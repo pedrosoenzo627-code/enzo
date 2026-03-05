@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ENZO STUDIOS | V1 PREMIUM</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#8b5cf6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+    
+    :root {
+      --bg-dark: #05050A; --glass-bg: rgba(20, 20, 30, 0.65); --glass-border: rgba(255, 255, 255, 0.08);
+      --c-primary: #8b5cf6; --c-blue: #3b82f6; --c-green: #10b981; --c-red: #f43f5e; --c-gold: #fbbf24;
+      --text-main: #f8fafc; --text-muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; -webkit-tap-highlight-color: transparent; }
+    
+    body { background-color: var(--bg-dark); color: var(--text-main); height: 100dvh; overflow: hidden; display: flex; position: relative; }
+    
+    /* Ambiente 3D Atmosférico */
+    body::before { content: ""; position: absolute; top: -20%; left: -10%; width: 60vw; height: 60vw; background: radial-gradient(circle, var(--c-primary) 0%, transparent 70%); filter: blur(120px); opacity: 0.15; z-index: -1; }
+    body::after { content: ""; position: absolute; bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: radial-gradient(circle, var(--c-blue) 0%, transparent 70%); filter: blur(120px); opacity: 0.15; z-index: -1; }
+
+    .hidden { display: none !important; }
+
+    /* ==========================================
+       PORTAL DE LOGIN REDESENHADO
+       ========================================== */
+    #security-gate { position: absolute; width: 100%; height: 100%; z-index: 9999; background: rgba(5, 5, 10, 0.85); backdrop-filter: blur(24px); display: flex; align-items: center; justify-content: center; }
+    
+    .login-box { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 32px; padding: 50px 40px; width: 90%; max-width: 420px; text-align: center; box-shadow: 0 30px 60px rgba(0,0,0,0.6); transition: 0.4s; }
+    .login-box h1 { font-size: 34px; font-weight: 800; background: linear-gradient(135deg, #fff, #a5b4fc); -webkit-background-clip: text; color: transparent; margin-bottom: 10px; letter-spacing: -1px; }
+    .login-box p { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
+    
+    input, select { width: 100%; padding: 18px 20px; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); border-radius: 16px; color: white; margin-bottom: 15px; font-size: 15px; outline: none; transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+    input:focus, select:focus { border-color: var(--c-primary); background: rgba(139, 92, 246, 0.05); box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1); }
+    
+    .btn-main { width: 100%; background: linear-gradient(135deg, var(--c-primary), var(--c-blue)); color: white; border: none; padding: 18px; border-radius: 16px; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.3s; margin-top: 10px; letter-spacing: 0.5px; }
+    .btn-main:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4); }
+    
+    .error-box { background: rgba(244, 63, 94, 0.15); border: 1px solid var(--c-red); color: #fff; padding: 15px; border-radius: 14px; font-size: 13px; margin-top: 15px; display: none; text-align: left; }
+
+    /* ==========================================
+       DASHBOARD STUDIO V1
+       ========================================== */
+    #dashboard { display: flex; width: 100%; height: 100%; }
+    
+    .sidebar { width: 280px; background: rgba(15, 15, 20, 0.7); border-right: 1px solid var(--glass-border); padding: 30px 20px; display: flex; flex-direction: column; backdrop-filter: blur(20px); z-index: 10; }
+    .brand { font-size: 28px; font-weight: 800; text-align: center; margin-bottom: 30px; color: #fff; }
+    .brand span { color: var(--c-primary); }
+    
+    .user-card { background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); padding: 18px; border-radius: 20px; margin-bottom: 25px; border: 1px solid var(--glass-border); text-align: center; }
+    #user-name-display { font-weight: 600; font-size: 18px; color: white; }
+    #user-role-display { font-size: 11px; font-weight: 800; letter-spacing: 2px; margin-top: 6px; padding: 4px 10px; background: rgba(0,0,0,0.5); border-radius: 10px; display: inline-block; }
+    
+    .nav-btn { background: transparent; border: none; color: var(--text-muted); text-align: left; padding: 16px 20px; margin-bottom: 8px; border-radius: 14px; font-weight: 600; font-size: 15px; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; gap: 12px; border: 1px solid transparent; }
+    .nav-btn:hover { background: rgba(255,255,255,0.03); color: white; transform: translateX(5px); }
+    .nav-btn.active { background: var(--c-primary); color: white; border-color: rgba(255,255,255,0.2); box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); transform: translateX(5px); }
+
+    .main-content { flex: 1; padding: clamp(20px, 4vw, 40px); overflow-y: hidden; display: flex; flex-direction: column; position: relative; }
+    .system-view { display: none; height: 100%; flex-direction: column; animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+    .system-view.active-view { display: flex; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ÁREAS DE FERRAMENTAS */
+    .view-header { margin-bottom: 20px; display: flex; flex-direction: column; }
+    .view-header h2 { font-size: 28px; font-weight: 800; }
+    .view-header p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
+
+    .chat-container { flex: 1; background: rgba(0,0,0,0.3); border-radius: 24px; border: 1px solid var(--glass-border); padding: 25px; overflow-y: auto; margin-bottom: 20px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; }
+    
+    .message { padding: 16px 22px; border-radius: 20px; max-width: 85%; font-size: 15px; line-height: 1.6; word-wrap: break-word; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .msg-user { background: linear-gradient(135deg, var(--c-primary), var(--c-blue)); color: white; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg-ia { background: var(--glass-bg); border: 1px solid var(--glass-border); align-self: flex-start; border-bottom-left-radius: 4px; }
+    
+    pre { background: #000; padding: 20px; border-radius: 14px; overflow-x: auto; color: #a5b4fc; font-family: 'JetBrains Mono', monospace; font-size: 13px; margin-top: 12px; border: 1px solid rgba(139, 92, 246, 0.3); }
+
+    .input-dock { display: flex; gap: 12px; background: rgba(20, 20, 30, 0.8); padding: 12px; border-radius: 24px; border: 1px solid var(--glass-border); backdrop-filter: blur(20px); }
+    .input-dock input { flex: 1; margin-bottom: 0; background: transparent; border: none; color: white; padding: 10px 15px; box-shadow: none; font-size: 16px; }
+    .input-dock input:focus { box-shadow: none; background: transparent; }
+    .input-dock button { border: none; padding: 14px 30px; border-radius: 16px; color: white; font-weight: 700; cursor: pointer; transition: 0.3s; font-size: 15px; }
+
+    /* CORES DINÂMICAS PARA CADA ABA */
+    #view-chat h2 { color: var(--c-primary); } #view-chat .input-dock button { background: var(--c-primary); } #view-chat .input-dock:focus-within { border-color: var(--c-primary); }
+    #view-lua h2 { color: var(--c-blue); } #view-lua .input-dock button { background: var(--c-blue); } #view-lua .input-dock:focus-within { border-color: var(--c-blue); }
+    #view-nano h2 { color: var(--c-green); } #view-nano .input-dock button { background: var(--c-green); color: black; } #view-nano .input-dock:focus-within { border-color: var(--c-green); }
+    #view-veo h2 { color: var(--c-red); } #view-veo .input-dock button { background: var(--c-red); } #view-veo .input-dock:focus-within { border-color: var(--c-red); }
+    #view-audio h2 { color: var(--c-gold); } #view-audio .input-dock button { background: var(--c-gold); color: black; } #view-audio .input-dock:focus-within { border-color: var(--c-gold); }
+
+    .media-display { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; background: rgba(0,0,0,0.3); border-radius: 24px; border: 1px solid var(--glass-border); margin-bottom: 20px; padding: 20px; text-align: center; }
+
+    /* MOBILE REDESIGN */
+    @media (max-width: 800px) {
+      #dashboard { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; overflow-x: auto; height: 80px; padding: 10px; border-right: none; border-bottom: 1px solid var(--glass-border); }
+      .sidebar::-webkit-scrollbar { display: none; }
+      .nav-btn { white-space: nowrap; margin-bottom: 0; padding: 12px 18px; border-radius: 100px; margin-right: 10px; }
+      .nav-btn:hover, .nav-btn.active { transform: none; }
+      .user-card, .brand { display: none; }
+      .main-content { height: calc(100dvh - 80px); padding: 15px; }
+      .input-dock { flex-direction: column; border-radius: 20px; }
+      .input-dock button { width: 100%; padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="security-gate">
+    <div class="login-box" id="box-login">
+      <h1>ENZO STUDIOS</h1>
+      <p>Ecossistema Sênior V1</p>
+      <input type="email" id="email-login" placeholder="Seu E-mail" onkeypress="handleEnterKey(event, 'login')">
+      <input type="password" id="pass-login" placeholder="Sua Senha" onkeypress="handleEnterKey(event, 'login')">
+      <button class="btn-main" id="btn-login" onclick="loginAccess()">INICIAR SESSÃO</button>
+      <div id="login-error" class="error-box"></div>
+      <p style="margin-top:25px; font-size:14px; color:var(--c-blue); cursor:pointer; font-weight:600;" onclick="toggleAuthMode('register')">Criar Conta na Academy</p>
+    </div>
+
+    <div class="login-box hidden" id="box-register">
+      <h1 style="background: linear-gradient(135deg, var(--c-green), var(--c-blue)); -webkit-background-clip: text;">ACADEMY</h1>
+      <p>Forje a sua Identidade</p>
+      <select id="course-reg"><option value="Roblox Lua">Roblox Lua</option></select>
+      <input type="email" id="email-reg" placeholder="E-mail">
+      <input type="password" id="pass-reg" placeholder="Senha (Mín. 6 letras)">
+      <button class="btn-main" style="background: linear-gradient(135deg, var(--c-green), var(--c-blue));" id="btn-register" onclick="registerAccess()">CADASTRAR E ENTRAR</button>
+      <div id="reg-error" class="error-box"></div>
+      <p style="margin-top:20px; font-size:14px; color:var(--text-muted); cursor:pointer;" onclick="toggleAuthMode('login')">Voltar ao Login</p>
+    </div>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <aside class="sidebar">
+      <div class="brand">ENZO<span>V1</span></div>
+      <div class="user-card">
+        <div id="user-name-display">Carregando...</div>
+        <div id="user-role-display">...</div>
+      </div>
+      <button class="nav-btn active" onclick="switchView('view-chat', this)">💬 Enzo IA Core</button>
+      <button class="nav-btn" onclick="switchView('view-lua', this)">💻 Lua Forge</button>
+      <button class="nav-btn" onclick="switchView('view-nano', this)">🎨 Nano Imagem</button>
+      <button class="nav-btn" onclick="switchView('view-veo', this)">🎬 Diretor Veo</button>
+      <button class="nav-btn" onclick="switchView('view-audio', this)">🎵 Estúdio Lyria</button>
+      <button class="nav-btn" style="margin-top:auto; color:var(--c-red);" onclick="firebase.auth().signOut().then(()=>location.reload())">Sair da Base</button>
+    </aside>
+
+    <main class="main-content">
+      <div id="view-chat" class="system-view active-view">
+        <div class="view-header">
+            <h2>Enzo IA Core</h2>
+            <p>Assistência neural avançada para programação e arquitetura de jogos.</p>
+        </div>
+        <div class="chat-container" id="chat-history">
+            <div class="message msg-ia">Conexão estabelecida. O que vamos construir hoje, Comandante?</div>
+        </div>
+        <div class="input-dock">
+          <input type="text" id="chat-input" placeholder="Faça a sua pergunta tática..." onkeypress="handleEnterKey(event, 'chat')">
+          <button onclick="sendChatMessage()">ENVIAR</button>
+        </div>
+      </div>
+
+      <div id="view-lua" class="system-view">
+        <div class="view-header">
+            <h2>Lua Forge Pro</h2>
+            <p>Geração de scripts puros em Luau para Roblox Studio.</p>
+        </div>
+        <div class="chat-container" id="lua-history" style="border-color: rgba(59, 130, 246, 0.3);">
+            <div class="message msg-ia">Motor de Forja pronto. Descreva a mecânica desejada.</div>
+        </div>
+        <div class="input-dock">
+          <input type="text" id="lua-input" placeholder="Ex: Crie uma porta que abre com TweenService..." onkeypress="handleEnterKey(event, 'lua')">
+          <button onclick="generateLuaCode()">FORJAR SCRIPT</button>
+        </div>
+      </div>
+
+      <div id="view-nano" class="system-view">
+        <div class="view-header">
+            <h2>Nano Banana V2</h2>
+            <p>Geração de assets visuais em tempo real.</p>
+        </div>
+        <div class="media-display" id="img-area" style="border-color: rgba(16, 185, 129, 0.3);">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎨</div><p style="color: var(--text-muted);">Aguardando prompt visual...</p>
+        </div>
+        <div class="input-dock">
+          <input type="text" id="nano-prompt" placeholder="Descreva a imagem (Ex: Cyberpunk Roblox character)..." onkeypress="handleEnterKey(event, 'nano')">
+          <button onclick="generateImage()">GERAR IMAGEM</button>
+        </div>
+      </div>
+
+      <div id="view-veo" class="system-view">
+        <div class="view-header">
+            <h2>Diretor Veo</h2>
+            <p>Motor de renderização de vídeo acelerado via IA.</p>
+        </div>
+        <div class="media-display" id="video-area" style="border-color: rgba(244, 63, 94, 0.3);">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎬</div><p style="color: var(--text-muted);">Aguardando roteiro...</p>
+        </div>
+        <div class="input-dock">
+          <input type="text" id="veo-prompt" placeholder="Descreva a cena para animar...">
+          <button onclick="generateVideo()">CRIAR VÍDEO</button>
+        </div>
+      </div>
+
+      <div id="view-audio" class="system-view">
+        <div class="view-header">
+            <h2>Estúdio Lyria</h2>
+            <p>Composição de trilhas sonoras profissionais.</p>
+        </div>
+        <div class="media-display" id="audio-area" style="border-color: rgba(251, 191, 36, 0.3);">
+            <div style="font-size: 50px; margin-bottom: 10px;">🎧</div><p style="color: var(--text-muted);">Aguardando estilo musical...</p>
+        </div>
+        <div class="input-dock">
+          <input type="text" id="audio-prompt" placeholder="Ex: Epic boss battle theme, electronic...">
+          <button onclick="generateAudio()">COMPOR FAIXA</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    // ==========================================
+    // VARIÁVEIS GLOBAIS E INICIALIZAÇÃO
+    // ==========================================
+    let currentStudentData = null; 
+    
+    // Troque este link quando colocar o server.js no Render.com
+    const BACKEND_URL = "http://localhost:3000"; 
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAGyR9mUFJklyNExyJacraQDdUtKyCqjBs",
+      authDomain: "enzo-studio.firebaseapp.com",
+      projectId: "enzo-studio",
+      storageBucket: "enzo-studio.firebasestorage.app",
+      messagingSenderId: "263240379991",
+      appId: "1:263240379991:web:ee303549b367b0ba50bd12"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    // PROTOCOLO TÚNEL SEGURO (Ignora AdBlockers)
+    db.settings({ experimentalForceLongPolling: true, merge: true });
+
+    // ==========================================
+    // NAVEGAÇÃO E UI
+    // ==========================================
+    function toggleAuthMode(mode) {
+      document.getElementById('box-login').classList.toggle('hidden', mode === 'register');
+      document.getElementById('box-register').classList.toggle('hidden', mode === 'login');
+    }
+
+    function switchView(viewId, btn) {
+      document.querySelectorAll('.system-view').forEach(v => v.classList.remove('active-view'));
+      document.getElementById(viewId).classList.add('active-view');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function handleEnterKey(e, m) { 
+        if(e.key === 'Enter') { 
+            if(m === 'chat') sendChatMessage(); 
+            if(m === 'lua') generateLuaCode();
+            if(m === 'nano') generateImage(); 
+            if(m === 'login') loginAccess();
+        }
+    }
+
+    // ==========================================
+    // AUTENTICAÇÃO BLINDADA
+    // ==========================================
+    async function loginAccess() {
+      const email = document.getElementById('email-login').value.trim();
+      const pass = document.getElementById('pass-login').value.trim();
+      const err = document.getElementById('login-error');
+      const btn = document.getElementById('btn-login');
+      
+      if(!email || !pass) return;
+
+      btn.innerText = "🔐 AUTENTICANDO...";
+      err.style.display = "none";
+
+      try {
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, pass);
+        await processUserAccess(userCredential.user);
+      } catch (e) {
+        btn.innerText = "INICIAR SESSÃO";
+        err.innerText = "⚠️ Erro: " + (e.code === 'auth/wrong-password' ? 'Senha Incorreta' : e.message);
+        err.style.display = "block";
+      }
+    }
+
+    async function registerAccess() {
+      const email = document.getElementById('email-reg').value.trim();
+      const pass = document.getElementById('pass-reg').value.trim();
+      
+      if(pass.length < 6) return alert("A senha deve ter no mínimo 6 caracteres.");
+      
+      try {
+        const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, pass);
+        const data = { email: email, role: (email.includes('pedroso') ? 'owner' : 'student') };
+        await db.collection('users').doc(email.toLowerCase()).set(data);
+        await processUserAccess(userCredential.user);
+      } catch (e) { 
+        alert("Erro ao cadastrar: " + e.message); 
+      }
+    }
+
+    async function processUserAccess(user) {
+      const email = user.email.toLowerCase();
+      try {
+        const doc = await db.collection('users').doc(email).get();
+        currentStudentData = doc.exists ? doc.data() : { email: email, role: 'student' };
+        prepareDashboard();
+      } catch (e) {
+        console.warn("Modo Offline Ativado devido a bloqueio do Firebase.");
+        currentStudentData = { email: email, role: 'offline-mode' };
+        prepareDashboard();
+      }
+    }
+
+    function prepareDashboard() {
+      if(!currentStudentData) return;
+      
+      // Coloca o nome do usuário (antes do @ do email)
+      document.getElementById('user-name-display').innerText = currentStudentData.email.split('@')[0];
+      
+      const roleDisplay = document.getElementById('user-role-display');
+      roleDisplay.innerText = currentStudentData.role === 'owner' ? 'COMANDANTE SUPREMO' : 'CADETE ACADEMY';
+      roleDisplay.style.color = currentStudentData.role === 'owner' ? 'var(--c-gold)' : 'var(--c-green)';
+      roleDisplay.style.border = `1px solid ${currentStudentData.role === 'owner' ? 'var(--c-gold)' : 'var(--c-green)'}`;
+      
+      document.getElementById('security-gate').classList.add('hidden');
+      document.getElementById('dashboard').classList.remove('hidden');
+    }
+
+    // ==========================================
+    // CHAMADAS DE API PARA O BACKEND REAL
+    // ==========================================
+    
+    async function sendChatMessage() {
+      const input = document.getElementById('chat-input');
+      const hist = document.getElementById('chat-history');
+      if(!input.value) return;
+      
+      const text = input.value; 
+      input.value = "";
+      
+      hist.innerHTML += `<div class="message msg-user">${text}</div>`;
+      hist.innerHTML += `<div class="message msg-ia" id="temp-chat">A processar a sua diretriz...</div>`;
+      hist.scrollTop = hist.scrollHeight;
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/chat`, { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify({ prompt: text }) 
+        });
+        const data = await res.json();
+        document.getElementById('temp-chat').innerHTML = data.resposta ? data.resposta.replace(/\n/g, '<br>') : data.erro;
+        document.getElementById('temp-chat').id = "";
+      } catch(e) { 
+        document.getElementById('temp-chat').innerText = "⚠️ Erro de conexão com o Cérebro Local. (Rode 'node server.js')"; 
+      }
+      hist.scrollTop = hist.scrollHeight;
+    }
+
+    async function generateLuaCode() {
+      const input = document.getElementById('lua-input');
+      const hist = document.getElementById('lua-history');
+      if(!input.value) return;
+      
+      const text = input.value; 
+      input.value = "";
+      
+      hist.innerHTML += `<div class="message msg-user" style="background: linear-gradient(135deg, var(--c-blue), #0ea5e9);">${text}</div>`;
+      hist.innerHTML += `<div class="message msg-ia" id="temp-lua">A compilar lógica...</div>`;
+      hist.scrollTop = hist.scrollHeight;
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/lua`, { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify({ prompt: text }) 
+        });
+        const data = await res.json();
+        document.getElementById('temp-lua').innerHTML = `<pre><code>${data.resposta || data.erro}</code></pre>`;
+        document.getElementById('temp-lua').id = "";
+      } catch(e) { 
+        document.getElementById('temp-lua').innerText = "⚠️ O Forjador está offline."; 
+      }
+      hist.scrollTop = hist.scrollHeight;
+    }
+
+    function generateImage() {
+      const p = document.getElementById('nano-prompt').value;
+      if(!p) return;
+      const area = document.getElementById('img-area');
+      area.innerHTML = `<img src="https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?nologo=true&enhance=true" style="width:100%; height:100%; object-fit:contain; border-radius:14px;">`;
+    }
+
+    async function generateVideo() {
+      const p = document.getElementById('veo-prompt').value;
+      if (!p) return;
+      const area = document.getElementById('video-area');
+      area.innerHTML = "<p style='color: var(--c-red); font-weight: 600;'>🎬 Gravando nos Servidores Fal.ai (Aguarde)...</p>";
+      
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/video`, { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify({ prompt: p }) 
+        });
+        const data = await res.json();
+        if (data.video_url) {
+            area.innerHTML = `<video controls autoplay loop style="width:100%; max-height:400px; border-radius:14px;"><source src="${data.video_url}" type="video/mp4"></video>`;
+        } else {
+            area.innerHTML = `⚠️ Falha: ${data.erro}`;
+        }
+      } catch(e) { 
+        area.innerHTML = "⚠️ Backend offline. Verifique o server.js."; 
+      }
+    }
+
+    async function generateAudio() {
+      const p = document.getElementById('audio-prompt').value;
+      if (!p) return;
+      const area = document.getElementById('audio-area');
+      area.innerHTML = "<p style='color: var(--c-gold); font-weight: 600;'>🎧 Os músicos de IA estão a tocar (Aguarde)...</p>";
+      
+      try {
+        const res = await fetch(`${BACKEND_URL}/api/audio`, { 
+            method: 'POST', 
+            headers: {'Content-Type': 'application/json'}, 
+            body: JSON.stringify({ prompt: p }) 
+        });
+        const data = await res.json();
+        if (data.audio_url) {
+            area.innerHTML = `<audio controls autoplay style="width:100%;"><source src="${data.audio_url}" type="audio/mpeg"></audio><br><br><a href="${data.audio_url}" target="_blank" style="color:var(--c-gold); text-decoration:none; font-size:14px; font-weight: bold; padding: 10px 20px; border: 1px solid var(--c-gold); border-radius: 10px;">📥 Descarregar Faixa</a>`;
+        } else {
+            area.innerHTML = `⚠️ Falha: ${data.erro}`;
+        }
+      } catch(e) { 
+        area.innerHTML = "⚠️ Backend offline. Verifique o server.js."; 
+      }
+    }
+
+    // ==========================================
+    // REGISTRO DO SERVICE WORKER (Para o PWABuilder)
+    // ==========================================
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then((registration) => {
+            console.log('✅ Service Worker V1 Registrado com sucesso!', registration.scope);
+        }).catch((err) => {
+            console.log('❌ Service Worker não encontrado (Normal se estiver no PC local):', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
