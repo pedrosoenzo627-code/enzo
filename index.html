@@ -154,7 +154,7 @@
             <p>Assistência neural avançada para programação e arquitetura de jogos.</p>
         </div>
         <div class="chat-container" id="chat-history">
-            <div class="message msg-ia">Conexão estabelecida. O que vamos construir hoje, Comandante?</div>
+            <div class="message msg-ia">Conexão de Guerrilha estabelecida. O que vamos construir hoje, Comandante?</div>
         </div>
         <div class="input-dock">
           <input type="text" id="chat-input" placeholder="Faça a sua pergunta tática..." onkeypress="handleEnterKey(event, 'chat')">
@@ -226,12 +226,14 @@
 
   <script>
     // ==========================================
-    // VARIÁVEIS GLOBAIS E INICIALIZAÇÃO
+    // ⚠️ TÁTICA DE GUERRILHA: MODO FRONTEND-ONLY
     // ==========================================
     let currentStudentData = null; 
     
-    // ⚠️ ATENÇÃO COMANDANTE ENZO: COLE O SEU LINK DO RENDER AQUI ABAIXO ⚠️
-    const BACKEND_URL = "https://enzo-1.onrender.com"; 
+    // CHAVES DE IA DIRETAS NO FRONTEND (TEMPORÁRIO PARA USO NO TELEMÓVEL)
+    const GROQ_API_KEY = "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";
+    const FAL_API_TOKEN = "5e066a3c-a272-40a8-8e28-d45acdfcba23:f05d38e674119fa5614b3db0f57cc4e4";
+    const CONHECIMENTO_ENZO_IA = "Você é a 'Enzo IA', Assistente Técnico Sênior da Enzo Studios V1. Especialidade: Programação Roblox Luau.";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAGyR9mUFJklyNExyJacraQDdUtKyCqjBs",
@@ -244,12 +246,9 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    // PROTOCOLO TÚNEL SEGURO (Ignora AdBlockers)
     db.settings({ experimentalForceLongPolling: true, merge: true });
 
-    // ==========================================
-    // NAVEGAÇÃO E UI
-    // ==========================================
+    // --- NAVEGAÇÃO E UI ---
     function toggleAuthMode(mode) {
       document.getElementById('box-login').classList.toggle('hidden', mode === 'register');
       document.getElementById('box-register').classList.toggle('hidden', mode === 'login');
@@ -271,14 +270,12 @@
         }
     }
 
-    // ==========================================
-    // AUTENTICAÇÃO BLINDADA
-    // ==========================================
+    // --- AUTENTICAÇÃO ---
     async function loginAccess() {
       const email = document.getElementById('email-login').value.trim();
       const pass = document.getElementById('pass-login').value.trim();
-      const btn = document.getElementById('btn-login');
       const err = document.getElementById('login-error');
+      const btn = document.getElementById('btn-login');
       if(!email || !pass) return;
 
       btn.innerText = "🔐 AUTENTICANDO...";
@@ -313,7 +310,6 @@
         currentStudentData = doc.exists ? doc.data() : { email: email, role: 'student' };
         prepareDashboard();
       } catch (e) {
-        console.warn("Modo Offline Ativado.");
         currentStudentData = { email: email, role: 'offline-mode' };
         prepareDashboard();
       }
@@ -322,19 +318,19 @@
     function prepareDashboard() {
       if(!currentStudentData) return;
       document.getElementById('user-name-display').innerText = currentStudentData.email.split('@')[0];
-      
       const roleDisplay = document.getElementById('user-role-display');
       roleDisplay.innerText = currentStudentData.role === 'owner' ? 'COMANDANTE SUPREMO' : 'CADETE ACADEMY';
       roleDisplay.style.color = currentStudentData.role === 'owner' ? 'var(--c-gold)' : 'var(--c-green)';
       roleDisplay.style.border = `1px solid ${currentStudentData.role === 'owner' ? 'var(--c-gold)' : 'var(--c-green)'}`;
-      
       document.getElementById('security-gate').classList.add('hidden');
       document.getElementById('dashboard').classList.remove('hidden');
     }
 
     // ==========================================
-    // CHAMADAS DE API PARA O BACKEND
+    // 🧠 MOTORES DE IA DIRETO NO NAVEGADOR
     // ==========================================
+    
+    // 1. CHAT DIRETO NA GROQ
     async function sendChatMessage() {
       const input = document.getElementById('chat-input');
       const hist = document.getElementById('chat-history');
@@ -342,18 +338,27 @@
       const text = input.value; input.value = "";
       
       hist.innerHTML += `<div class="message msg-user">${text}</div>`;
-      hist.innerHTML += `<div class="message msg-ia" id="temp-chat">A processar a sua diretriz...</div>`;
+      hist.innerHTML += `<div class="message msg-ia" id="temp-chat">A processar na nuvem da Groq...</div>`;
       hist.scrollTop = hist.scrollHeight;
 
       try {
-        const res = await fetch(`${BACKEND_URL}/api/chat`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ prompt: text }) });
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+            body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [{ role: "system", content: CONHECIMENTO_ENZO_IA }, { role: "user", content: text }],
+                temperature: 0.3 
+            })
+        });
         const data = await res.json();
-        document.getElementById('temp-chat').innerHTML = data.resposta ? data.resposta.replace(/\n/g, '<br>') : data.erro;
+        document.getElementById('temp-chat').innerHTML = data.choices[0].message.content.replace(/\n/g, '<br>');
         document.getElementById('temp-chat').id = "";
-      } catch(e) { document.getElementById('temp-chat').innerText = "⚠️ Erro de conexão com a Nuvem. Verifique o Render."; }
+      } catch(e) { document.getElementById('temp-chat').innerText = "⚠️ Erro CORS ou falha na API."; }
       hist.scrollTop = hist.scrollHeight;
     }
 
+    // 2. LUA FORGE DIRETO NA GROQ
     async function generateLuaCode() {
       const input = document.getElementById('lua-input');
       const hist = document.getElementById('lua-history');
@@ -361,18 +366,28 @@
       const text = input.value; input.value = "";
       
       hist.innerHTML += `<div class="message msg-user" style="background: linear-gradient(135deg, var(--c-blue), #0ea5e9);">${text}</div>`;
-      hist.innerHTML += `<div class="message msg-ia" id="temp-lua">A compilar lógica...</div>`;
+      hist.innerHTML += `<div class="message msg-ia" id="temp-lua">A compilar lógica em Luau...</div>`;
       hist.scrollTop = hist.scrollHeight;
 
       try {
-        const res = await fetch(`${BACKEND_URL}/api/lua`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ prompt: text }) });
+        const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_API_KEY}` },
+            body: JSON.stringify({
+                model: "llama-3.1-8b-instant",
+                messages: [{ role: "system", content: "Retorne APENAS o código Luau formatado, sem introduções ou explicações. Apenas código limpo." }, { role: "user", content: text }],
+                temperature: 0.1 
+            })
+        });
         const data = await res.json();
-        document.getElementById('temp-lua').innerHTML = `<pre><code>${data.resposta || data.erro}</code></pre>`;
+        const codeClean = data.choices[0].message.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        document.getElementById('temp-lua').innerHTML = `<pre><code>${codeClean}</code></pre>`;
         document.getElementById('temp-lua').id = "";
-      } catch(e) { document.getElementById('temp-lua').innerText = "⚠️ O Forjador está offline."; }
+      } catch(e) { document.getElementById('temp-lua').innerText = "⚠️ Erro CORS ou falha na Forja."; }
       hist.scrollTop = hist.scrollHeight;
     }
 
+    // 3. IMAGEM DIRETO NA POLLINATIONS
     function generateImage() {
       const p = document.getElementById('nano-prompt').value;
       if(!p) return;
@@ -380,37 +395,50 @@
       area.innerHTML = `<img src="https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?nologo=true&enhance=true" style="width:100%; height:100%; object-fit:contain; border-radius:14px;">`;
     }
 
+    // 4. VÍDEO DIRETO NA FAL.AI
     async function generateVideo() {
       const p = document.getElementById('veo-prompt').value;
       if (!p) return;
       const area = document.getElementById('video-area');
-      area.innerHTML = "<p style='color: var(--c-red); font-weight:600;'>🎬 Gravando nos Servidores Fal.ai (Aguarde)...</p>";
+      area.innerHTML = "<p style='color: var(--c-red); font-weight:600;'>🎬 Gravando nos Servidores Fal.ai (Aguarde ~30s)...</p>";
       try {
-        const res = await fetch(`${BACKEND_URL}/api/video`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ prompt: p }) });
+        const res = await fetch('https://fal.run/fal-ai/fast-svd/text-to-video', {
+            method: 'POST',
+            headers: { 'Authorization': `Key ${FAL_API_TOKEN}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: p })
+        });
         const data = await res.json();
-        if (data.video_url) area.innerHTML = `<video controls autoplay loop style="width:100%; max-height:400px; border-radius:14px;"><source src="${data.video_url}" type="video/mp4"></video>`;
-        else area.innerHTML = `⚠️ Falha: ${data.erro}`;
-      } catch(e) { area.innerHTML = "⚠️ Backend offline."; }
+        if (data.video && data.video.url) {
+            area.innerHTML = `<video controls autoplay loop style="width:100%; max-height:400px; border-radius:14px;"><source src="${data.video.url}" type="video/mp4"></video>`;
+        } else {
+            area.innerHTML = `⚠️ Falha ao receber o vídeo da API.`;
+        }
+      } catch(e) { area.innerHTML = "⚠️ Erro de bloqueio (CORS). Tente mais tarde pelo backend no PC."; }
     }
 
+    // 5. ÁUDIO DIRETO NA FAL.AI
     async function generateAudio() {
       const p = document.getElementById('audio-prompt').value;
       if (!p) return;
       const area = document.getElementById('audio-area');
-      area.innerHTML = "<p style='color: var(--c-gold); font-weight:600;'>🎧 Os músicos de IA estão a tocar (Aguarde)...</p>";
+      area.innerHTML = "<p style='color: var(--c-gold); font-weight:600;'>🎧 Os músicos de IA estão a tocar (Aguarde ~15s)...</p>";
       try {
-        const res = await fetch(`${BACKEND_URL}/api/audio`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ prompt: p }) });
+        const res = await fetch('https://fal.run/fal-ai/stable-audio', {
+            method: 'POST',
+            headers: { 'Authorization': `Key ${FAL_API_TOKEN}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ prompt: p, seconds_total: 15 })
+        });
         const data = await res.json();
-        if (data.audio_url) area.innerHTML = `<audio controls autoplay style="width:100%;"><source src="${data.audio_url}" type="audio/mpeg"></audio><br><br><a href="${data.audio_url}" target="_blank" style="color:var(--c-gold); text-decoration:none; font-size:14px; font-weight:bold; border: 1px solid var(--c-gold); padding: 8px 15px; border-radius: 10px;">📥 Descarregar</a>`;
-        else area.innerHTML = `⚠️ Falha: ${data.erro}`;
-      } catch(e) { area.innerHTML = "⚠️ Backend offline."; }
+        if (data.audio_file && data.audio_file.url) {
+            area.innerHTML = `<audio controls autoplay style="width:100%;"><source src="${data.audio_file.url}" type="audio/mpeg"></audio><br><br><a href="${data.audio_file.url}" target="_blank" style="color:var(--c-gold); text-decoration:none; font-size:14px; font-weight:bold; border: 1px solid var(--c-gold); padding: 8px 15px; border-radius: 10px;">📥 Descarregar</a>`;
+        } else {
+            area.innerHTML = `⚠️ Falha ao receber o áudio da API.`;
+        }
+      } catch(e) { area.innerHTML = "⚠️ Erro de bloqueio (CORS). Tente mais tarde pelo backend no PC."; }
     }
 
-    // REGISTRO DO SERVICE WORKER (Para o PWABuilder)
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => console.log("SW não encontrado no teste local."));
-      });
+      window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(()=>{}));
     }
   </script>
 </body>
